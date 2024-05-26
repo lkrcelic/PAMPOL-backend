@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Insert data into Doctor table -->
+    <changeSet id="1" author="lkrcelic">
+        <sqlFile path="data/insert_doctors.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- Insert data into Pharmacy table -->
+    <changeSet id="2" author="lkrcelic">
+        <sqlFile path="data/insert_pharmacy.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- Insert data into Medication table -->
+    <changeSet id="3" author="lkrcelic">
+        <sqlFile path="data/insert_medication.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- Insert data into Pharmacist table -->
+    <changeSet id="4" author="lkrcelic">
+        <sqlFile path="data/insert_pharmacist.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+      <!-- Insert data into Pharmacy_Medication table -->
+        <changeSet id="5" author="lkrcelic">
+            <sqlFile path="data/insert_pharmacy_medication.sql" relativeToChangelogFile="true"/>
+        </changeSet>
+
+        <!-- Insert data into Doctor_Pharmacy table -->
+        <changeSet id="6" author="lkrcelic">
+            <sqlFile path="data/insert_doctor_pharmacy.sql" relativeToChangelogFile="true"/>
+        </changeSet>
+
+</databaseChangeLog>
