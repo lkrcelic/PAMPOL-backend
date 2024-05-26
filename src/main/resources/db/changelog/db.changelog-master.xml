@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create Doctor table -->
+    <changeSet id="1" author="lkrcelic">
+        <createTable tableName="Doctor">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="first_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="specialty" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create Pharmacy table -->
+    <changeSet id="2" author="lkrcelic">
+        <createTable tableName="Pharmacy">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create Medication table -->
+    <changeSet id="3" author="lkrcelic">
+        <createTable tableName="Medication">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manufacturer" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="NUMERIC">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create Pharmacist table -->
+    <changeSet id="4" author="lkrcelic">
+        <createTable tableName="Pharmacist">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="pharmacy_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+            baseColumnNames="pharmacy_id"
+            baseTableName="Pharmacist"
+            constraintName="fk_pharmacist_pharmacy"
+            referencedColumnNames="id"
+            referencedTableName="Pharmacy"/>
+    </changeSet>
+
+    <!-- Create Doctor_Pharmacy join table -->
+    <changeSet id="5" author="lkrcelic">
+        <createTable tableName="Doctor_Pharmacy">
+            <column name="doctor_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pharmacy_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+            baseColumnNames="doctor_id"
+            baseTableName="Doctor_Pharmacy"
+            constraintName="fk_doctor_pharmacy_doctor"
+            referencedColumnNames="id"
+            referencedTableName="Doctor"/>
+        <addForeignKeyConstraint
+            baseColumnNames="pharmacy_id"
+            baseTableName="Doctor_Pharmacy"
+            constraintName="fk_doctor_pharmacy_pharmacy"
+            referencedColumnNames="id"
+            referencedTableName="Pharmacy"/>
+        <addPrimaryKey columnNames="doctor_id, pharmacy_id" tableName="Doctor_Pharmacy"/>
+    </changeSet>
+
+   <!-- Create Pharmacy_Medication join table -->
+   <changeSet id="6" author="lkrcelic">
+       <createTable tableName="Pharmacy_Medication">
+           <column name="id" type="BIGINT">
+               <constraints primaryKey="true"/>
+           </column>
+           <column name="pharmacy_id" type="BIGINT">
+               <constraints nullable="false"/>
+           </column>
+           <column name="medication_id" type="BIGINT">
+               <constraints nullable="false"/>
+           </column>
+           <column name="quantity" type="INT">
+               <constraints nullable="false"/>
+           </column>
+       </createTable>
+       <addForeignKeyConstraint
+           baseColumnNames="pharmacy_id"
+           baseTableName="Pharmacy_Medication"
+           constraintName="fk_pharmacy_medication_pharmacy"
+           referencedColumnNames="id"
+           referencedTableName="Pharmacy"/>
+       <addForeignKeyConstraint
+           baseColumnNames="medication_id"
+           baseTableName="Pharmacy_Medication"
+           constraintName="fk_pharmacy_medication_medication"
+           referencedColumnNames="id"
+           referencedTableName="Medication"/>
+       <addUniqueConstraint
+           columnNames="pharmacy_id, medication_id"
+           tableName="Pharmacy_Medication"
+           constraintName="uq_pharmacy_medication"/>
+   </changeSet>
+
+
+    <!-- Include the data insertion changelog -->
+    <include file="db/changelog/db.changelog-insert-data.xml"/>
+
+</databaseChangeLog>
