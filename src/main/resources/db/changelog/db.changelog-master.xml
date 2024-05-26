@@ -8,7 +8,7 @@
     <!-- Create Doctor table -->
     <changeSet id="1" author="lkrcelic">
         <createTable tableName="Doctor">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="first_name" type="VARCHAR(50)">
@@ -26,7 +26,7 @@
     <!-- Create Pharmacy table -->
     <changeSet id="2" author="lkrcelic">
         <createTable tableName="Pharmacy">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="VARCHAR(255)">
@@ -41,7 +41,7 @@
     <!-- Create Medication table -->
     <changeSet id="3" author="lkrcelic">
         <createTable tableName="Medication">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="VARCHAR(255)">
@@ -59,11 +59,11 @@
     <!-- Create Pharmacist table -->
     <changeSet id="4" author="lkrcelic">
         <createTable tableName="Pharmacist">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="pharmacy_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="first_name" type="VARCHAR(50)">
                 <constraints nullable="false"/>
@@ -105,42 +105,40 @@
         <addPrimaryKey columnNames="doctor_id, pharmacy_id" tableName="Doctor_Pharmacy"/>
     </changeSet>
 
-   <!-- Create Pharmacy_Medication join table -->
-   <changeSet id="6" author="lkrcelic">
-       <createTable tableName="Pharmacy_Medication">
-           <column name="id" type="BIGINT">
-               <constraints primaryKey="true"/>
-           </column>
-           <column name="pharmacy_id" type="BIGINT">
-               <constraints nullable="false"/>
-           </column>
-           <column name="medication_id" type="BIGINT">
-               <constraints nullable="false"/>
-           </column>
-           <column name="quantity" type="INT">
-               <constraints nullable="false"/>
-           </column>
-       </createTable>
-       <addForeignKeyConstraint
-           baseColumnNames="pharmacy_id"
-           baseTableName="Pharmacy_Medication"
-           constraintName="fk_pharmacy_medication_pharmacy"
-           referencedColumnNames="id"
-           referencedTableName="Pharmacy"/>
-       <addForeignKeyConstraint
-           baseColumnNames="medication_id"
-           baseTableName="Pharmacy_Medication"
-           constraintName="fk_pharmacy_medication_medication"
-           referencedColumnNames="id"
-           referencedTableName="Medication"/>
-       <addUniqueConstraint
-           columnNames="pharmacy_id, medication_id"
-           tableName="Pharmacy_Medication"
-           constraintName="uq_pharmacy_medication"/>
-   </changeSet>
-
+    <!-- Create Pharmacy_Medication join table -->
+    <changeSet id="6" author="lkrcelic">
+        <createTable tableName="Pharmacy_Medication">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="pharmacy_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="medication_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+            baseColumnNames="pharmacy_id"
+            baseTableName="Pharmacy_Medication"
+            constraintName="fk_pharmacy_medication_pharmacy"
+            referencedColumnNames="id"
+            referencedTableName="Pharmacy"/>
+        <addForeignKeyConstraint
+            baseColumnNames="medication_id"
+            baseTableName="Pharmacy_Medication"
+            constraintName="fk_pharmacy_medication_medication"
+            referencedColumnNames="id"
+            referencedTableName="Medication"/>
+        <addUniqueConstraint
+            columnNames="pharmacy_id, medication_id"
+            tableName="Pharmacy_Medication"
+            constraintName="uq_pharmacy_medication"/>
+    </changeSet>
 
     <!-- Include the data insertion changelog -->
     <include file="db/changelog/db.changelog-insert-data.xml"/>
-
 </databaseChangeLog>
