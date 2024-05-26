@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/medications")
+@CrossOrigin(origins = "http://localhost:3000")
 public class MedicationController {
 
     private final MedicationService medicationService;
