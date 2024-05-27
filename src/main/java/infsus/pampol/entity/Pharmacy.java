@@ -9,7 +9,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,10 +20,8 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Pharmacy {
 
     @Id
@@ -44,5 +44,12 @@ public class Pharmacy {
         inverseJoinColumns = @JoinColumn(name = "doctor_id")
     )
     private Set<Doctor> doctors;
+
+    @PreRemove
+    private void preRemove() {
+        for (Pharmacist pharmacist : pharmacists) {
+            pharmacist.setPharmacy(null);
+        }
+    }
 
 }
