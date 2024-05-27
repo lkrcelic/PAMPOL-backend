@@ -1,26 +1,32 @@
 package infsus.pampol.service;
 
 import infsus.pampol.dto.command.PharmacyCreateCommand;
+import infsus.pampol.dto.command.PharmacyMedicationCreateCommand;
 import infsus.pampol.dto.command.PharmacyUpdateCommand;
 import infsus.pampol.dto.response.PharmacyResponse;
 import infsus.pampol.entity.*;
 import infsus.pampol.mapper.PharmacyMapper;
+import infsus.pampol.repository.MedicationRepository;
 import infsus.pampol.repository.PharmacyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class PharmacyService {
 
+    private final MedicationRepository medicationRepository;
     private final PharmacyRepository pharmacyRepository;
     private final PharmacyMapper pharmacyMapper;
 
     @Autowired
-    public PharmacyService(PharmacyRepository pharmacyRepository, PharmacyMapper pharmacyMapper) {
+    public PharmacyService(MedicationRepository medicationRepository, PharmacyRepository pharmacyRepository,
+        PharmacyMapper pharmacyMapper) {
+        this.medicationRepository = medicationRepository;
         this.pharmacyRepository = pharmacyRepository;
         this.pharmacyMapper = pharmacyMapper;
     }
@@ -52,4 +58,5 @@ public class PharmacyService {
     public void deletePharmacy(Long id) {
         pharmacyRepository.deleteById(id);
     }
+
 }
