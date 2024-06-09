@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pharmacy Tasks</title>
+</head>
+<body>
+<h1>Pharmacy Tasks</h1>
+<table id="tasksTable">
+    <tr>
+        <th>Task ID</th>
+        <th>Task Name</th>
+        <th>Variables</th>
+        <th>Action</th>
+    </tr>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/pharmacies/tasks/pharmacy')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('tasksTable');
+                data.forEach(task => {
+                    const row = table.insertRow();
+                    const cellId = row.insertCell(0);
+                    const cellName = row.insertCell(1);
+                    const cellVariables = row.insertCell(2);
+                    const cellAction = row.insertCell(3);
+
+                    cellId.innerText = task.id;
+                    cellName.innerText = task.name;
+                    cellVariables.innerText = JSON.stringify(task.variables);
+
+                    const button = document.createElement('button');
+                    button.innerText = 'Confirm';
+                    button.onclick = function() {
+                        fetch('/api/pharmacies/task/pharmacy/confirm/' + task.id, { method: 'POST' })
+                            .then(response => {
+                                if (response.ok) {
+                                    row.remove();
+                                } else {
+                                    alert('Failed to confirm task');
+                                }
+                            });
+                    };
+                    cellAction.appendChild(button);
+                });
+            });
+    });
+</script>
+</body>
+</html>
