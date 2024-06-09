@@ -99,12 +99,16 @@ public class DoctorController {
     }
 
     @PostMapping("/start-process")
-    public ResponseEntity<Void> startDoctorProcess() {
+    public ResponseEntity<Map<String, Object>> startDoctorProcess() {
         boolean medicationExists = !medicationService.getAllMedications().isEmpty();
         Map<String, Object> variables = new HashMap<>();
         variables.put("medicationExists", medicationExists);
         runtimeService.startProcessInstanceByKey("DoctorProcess", variables);
-        return ResponseEntity.ok().build();
+        List<Doctor> doctors = doctorService.getAllDoctors();
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Process started successfully");
+        response.put("doctors", doctors);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/task/delete-doctor/{id}")
