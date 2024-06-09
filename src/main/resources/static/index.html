@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pharmacy Tasks</title>
+    <title>Doctor Tasks</title>
 </head>
 <body>
-<h1>Pharmacy Tasks</h1>
+<h1>Doctor Tasks</h1>
+<button onclick="startProcess()">Start Doctor Process</button>
 <table id="tasksTable">
     <tr>
         <th>Task ID</th>
@@ -15,11 +16,32 @@
 </table>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('/api/pharmacies/tasks/pharmacy')
-            .then(response => response.json())
+    function startProcess() {
+        fetch('/api/doctors/start-process', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert('Process started');
+                    loadTasks();
+                } else {
+                    alert('Failed to start process');
+                }
+            });
+    }
+
+    function loadTasks() {
+        fetch('/api/doctors/tasks')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
             .then(data => {
                 const table = document.getElementById('tasksTable');
+                // Clear existing rows
+                while (table.rows.length > 1) {
+                    table.deleteRow(1);
+                }
                 data.forEach(task => {
                     const row = table.insertRow();
                     const cellId = row.insertCell(0);
@@ -34,7 +56,7 @@
                     const button = document.createElement('button');
                     button.innerText = 'Confirm';
                     button.onclick = function() {
-                        fetch('/api/pharmacies/task/pharmacy/confirm/' + task.id, { method: 'POST' })
+                        fetch('/api/doctors/task/confirm/' + task.id, { method: 'POST' })
                             .then(response => {
                                 if (response.ok) {
                                     row.remove();
@@ -44,9 +66,16 @@
                             });
                     };
                     cellAction.appendChild(button);
+
+                    console.log('Button created for task:', task.id);
                 });
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
             });
-    });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadTasks);
 </script>
 </body>
 </html>

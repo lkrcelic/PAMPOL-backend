@@ -6,11 +6,17 @@ import infsus.pampol.dto.response.DoctorResponse;
 import infsus.pampol.entity.Doctor;
 import infsus.pampol.mapper.DoctorMapper;
 import infsus.pampol.service.DoctorService;
+import infsus.pampol.service.MedicationService;
+import org.camunda.bpm.engine.RuntimeService;
+import org.camunda.bpm.engine.TaskService;
+import org.camunda.bpm.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,25 +27,31 @@ public class DoctorController {
 
     private final DoctorService doctorService;
     private final DoctorMapper doctorMapper;
+    private final RuntimeService runtimeService;
+    private final TaskService taskService;
+    private final MedicationService medicationService;
 
     @Autowired
-    public DoctorController(DoctorService doctorService, DoctorMapper doctorMapper) {
+    public DoctorController(DoctorService doctorService, DoctorMapper doctorMapper, RuntimeService runtimeService, TaskService taskService, MedicationService medicationService) {
         this.doctorService = doctorService;
         this.doctorMapper = doctorMapper;
+        this.runtimeService = runtimeService;
+        this.taskService = taskService;
+        this.medicationService = medicationService;
     }
 
     @GetMapping
     public List<DoctorResponse> getAllDoctors() {
         return doctorService.getAllDoctors().stream()
-            .map(doctorMapper::toResponse)
-            .collect(Collectors.toList());
+                .map(doctorMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DoctorResponse> getDoctorById(@PathVariable Long id) {
         Optional<Doctor> doctor = doctorService.getDoctorById(id);
         return doctor.map(value -> ResponseEntity.ok(doctorMapper.toResponse(value)))
-            .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -62,5 +74,46 @@ public class DoctorController {
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctor(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/tasks")
+    public List<Map<String, Object>> getTasks() {
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee("doctorUser").initializeFormKeys().list();
+
+        return tasks.stream()
+                .map(task -> {
+                    Map<String, Object> details = new HashMap<>();
+                    details.put("id", task.getId());
+                    details.put("name", task.getName());
+                    Map<String, Object> variables = taskService.getVariables(task.getId());
+                    details.put("variables", variables);
+                    return details;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/task/confirm/{id}")
+    public ResponseEntity<Void> confirmTask(@PathVariable("id") String taskId) {
+        taskService.complete(taskId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/start-process")
+    public ResponseEntity<Void> startDoctorProcess() {
+        boolean medicationExists = !medicationService.getAllMedications().isEmpty();
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("medicationExists", medicationExists);
+        runtimeService.startProcessInstanceByKey("DoctorProcess", variables);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/task/delete-doctor/{id}")
+    public ResponseEntity<Void> deleteDoctorTask(@PathVariable("id") String taskId) {
+        // Fetch the doctor ID to be deleted from process variables
+        Map<String, Object> variables = taskService.getVariables(taskId);
+        Long doctorId = (Long) variables.get("doctorId");
+        doctorService.deleteDoctor(doctorId);
+        taskService.complete(taskId);
+        return ResponseEntity.ok().build();
     }
 }
