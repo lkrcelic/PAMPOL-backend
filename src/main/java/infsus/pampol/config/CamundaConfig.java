@@ -1,5 +1,6 @@
 package infsus.pampol.config;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
@@ -7,12 +8,14 @@ import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 
 @Configuration
 public class CamundaConfig implements WebMvcConfigurer {
@@ -23,12 +26,31 @@ public class CamundaConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public SpringProcessEngineConfiguration processEngineConfiguration(DataSource dataSource, PlatformTransactionManager transactionManager) {
+    public DataSource dataSource() {
+        BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:mem:testdb");
+        dataSource.setUsername("sa");
+        dataSource.setPassword("");
+        return dataSource;
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(dataSource());
+    }
+
+    @Bean
+    public SpringProcessEngineConfiguration processEngineConfiguration() throws IOException {
         SpringProcessEngineConfiguration configuration = new SpringProcessEngineConfiguration();
-        configuration.setDataSource(dataSource);
-        configuration.setTransactionManager(transactionManager);
+        configuration.setDataSource(dataSource());
+        configuration.setTransactionManager(transactionManager());
         configuration.setDatabaseSchemaUpdate("true");
-        // Dodatne konfiguracije po potrebi
+        configuration.setJobExecutorActivate(true);
+        configuration.setAuthorizationEnabled(true);
+        configuration.setDefaultSerializationFormat("application/json");
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        configuration.setDeploymentResources(resolver.getResources("classpath:/bpmn/*.bpmn"));
         return configuration;
     }
 
@@ -45,10 +67,5 @@ public class CamundaConfig implements WebMvcConfigurer {
     @Bean
     public TaskService taskService(ProcessEngine processEngine) {
         return processEngine.getTaskService();
-    }
-
-    @Bean
-    public PlatformTransactionManager transactionManager(DataSource dataSource) {
-        return new DataSourceTransactionManager(dataSource);
     }
 }
